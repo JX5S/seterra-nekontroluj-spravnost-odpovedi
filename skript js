@@ -1,0 +1,159 @@
+/*
+Změna funkce na ověřování odpovědi na https://online.seterra.com/. Mělo by fungovat na všechny jejich testy
+
+https://github.com/JX5S/seterra-nekontroluj-spravnost-odpovedi
+
+Neručím za funkci, ale mně to v únoru 2021 šlo
+ */
+
+function checkQuestion(e, myEvent) {
+
+    stopFlashing();
+    var clickedOn = e.id //e.data("country");
+    lastLeft = myEvent.pageX;
+    lastTop = myEvent.pageY;
+
+
+    if (1 == 1) { // originál: if (q == clickedOn); tohle je  jediný řádek, který je potřeba změnit :)
+
+        animateCircle(myEvent.pageX, myEvent.pageY, "#anicircle")
+
+        if (wrongClicks == 0) setCorrect(q);
+
+        addSVGAttribute(e, "answered");
+
+        removeSVGAttribute(e, "flashing");
+        correctClicks++;
+        totalClicks++;
+        qid++;
+
+        var removeIndex;
+        removeIndex = -1;
+        $.grep(objCountry, function (n, idx) {
+
+            if (n.id == clickedOn) {
+                removeIndex = idx;
+            }
+        })
+        if (removeIndex != -1) objCountry.splice(removeIndex, 1);
+
+        $(".label").remove();
+
+        //if (objQ.infoImgURL != null || objQ.infoText != "") {
+        //    makeInfoLabel(objQ.id, objQ.infoText, objQ.infoImgURL);
+        //}
+
+
+        e.setAttribute("data-errors", wrongClicks);
+        if (showInfoText == 1) {
+            showInfoText2(e);
+        };
+
+
+        if (wrongClicks < 3) {
+            paintGroup(e, guessColors[wrongClicks]);
+
+        } else {
+
+            paintGroup(e, guessColors[3]);
+
+        }
+        var timeoutid;
+        if (gameMode == 'pinhard') {
+            (function (e) {
+                timeoutid = setTimeout(function () {
+                    unPaintGroup(e);
+
+                    playOtherSound();
+                }, 1000);
+            }(e));
+            e.setAttribute("data-timeoutid", timeoutid);
+        }
+
+        if (e.querySelectorAll(".city, .city1").length > 0) {
+            if (showLabels == 1 && gameMode == 'pin') { showLabel(e, false, labelColors[Math.min(wrongClicks, 3)], false, true) } else { showLabel(e, 3000, labelColors[Math.min(wrongClicks, 3)], false, false) };
+
+            if (gameMode == 'pin' && e.querySelectorAll(".city, .city1").length > 0) {
+                showDot(e);
+
+            }
+
+
+        } else {
+            if (keepAreaLabels == 1 && gameMode == 'pin') { showLabel(e, false, labelColors[Math.min(wrongClicks, 3)], false, true); } else { showLabel(e, 1000, labelColors[Math.min(wrongClicks, 3)], false, false); }
+
+
+        }
+
+        if (wrongClicks >= 3) { paintLabel(e.getAttribute("id"), "white") }
+
+        wrongClicks = 0;
+        if (objCountry.length > 0) {
+
+            nextQuestion();
+            playCorrectAnswerSound(1);
+        } else {
+            playCorrectAnswerSound(1);
+            if (totalClicks == correctClicks) {
+                playCorrectAnswerSound(3);
+            } else {
+                playCorrectAnswerSound(2);
+
+            }
+
+
+            // game over
+
+            $('#currQuestion').html(" ");
+            $("#imgQuestionFlag").hide();
+            $("#imgInFlag").hide()
+            $("#imgOutFlag").hide()
+            if (gameMode == 'pinhard') {
+                $(".noq").attr("class", "noq"); // remove q class 
+
+                $(".q").each(function () {
+                    clearTimeout(this.getAttribute("data-timeoutid"));
+                    repaintGroup(this);
+                });
+                $(".q").attr("class", ""); // remove q class 
+
+            }
+            $(".gamewindow").unbind('mouseenter mouseleave');
+            stopTimer();
+            updateScore();
+            setupCompletion();
+            showCompletion();
+            q = "";
+        }
+    } else {
+
+        if ((objCountry.length > 0) && (($(e)[0].hasClass("answered") == false || (gameMode == 'pinhard')))) {
+
+            showLabel(e, 2000, "#3b965f", false, false);
+            paintLabel(e.getAttribute("id"), "white")
+            if (wrongClicks >= 2) {
+
+                flashCorrect(q)
+            }
+            wrongClicks++;
+            totalClicks++;
+
+            playWrongAnswerSound();
+        }
+        else {
+            showText2(e);
+
+        }
+
+        // Needed for touch devices, do not delete.
+        if (objCountry.length > 0) {
+            qText = getQuizLabeltext(objQ, objCountry)
+            $("#label_quizLabel").offset({ left: myEvent.pageX + 20, top: myEvent.pageY + 20 });
+            makeQuizLabel(showInfoImageTop, qText, objQ.infoImgURL);
+
+
+        }
+        //hideLabel = setTimeout(function () { $("#label_quizLabel").fadeOut(1000, function () { $("#label_quizLabel").remove() }) }, 2000);
+    }
+    updateScore();
+}
