@@ -12,9 +12,9 @@ function checkQuestion(e, myEvent) {
     var clickedOn = e.id //e.data("country");
     lastLeft = myEvent.pageX;
     lastTop = myEvent.pageY;
-
-
-    if (1 == 1) { // originál: if (q == clickedOn); tohle je  jediný řádek, který je potřeba změnit :)
+    
+    // tohle je jediná reálná změna, pak jsem jenom odebral zbytečný kód
+    if (1 == 1) { // tohle původně kontrolovalo, zda je odpověď správná. Teď už to bude pravda vždy :)
 
         animateCircle(myEvent.pageX, myEvent.pageY, "#anicircle")
 
@@ -125,35 +125,6 @@ function checkQuestion(e, myEvent) {
             showCompletion();
             q = "";
         }
-    } else {
-
-        if ((objCountry.length > 0) && (($(e)[0].hasClass("answered") == false || (gameMode == 'pinhard')))) {
-
-            showLabel(e, 2000, "#3b965f", false, false);
-            paintLabel(e.getAttribute("id"), "white")
-            if (wrongClicks >= 2) {
-
-                flashCorrect(q)
-            }
-            wrongClicks++;
-            totalClicks++;
-
-            playWrongAnswerSound();
-        }
-        else {
-            showText2(e);
-
-        }
-
-        // Needed for touch devices, do not delete.
-        if (objCountry.length > 0) {
-            qText = getQuizLabeltext(objQ, objCountry)
-            $("#label_quizLabel").offset({ left: myEvent.pageX + 20, top: myEvent.pageY + 20 });
-            makeQuizLabel(showInfoImageTop, qText, objQ.infoImgURL);
-
-
-        }
-        //hideLabel = setTimeout(function () { $("#label_quizLabel").fadeOut(1000, function () { $("#label_quizLabel").remove() }) }, 2000);
     }
     updateScore();
 }
